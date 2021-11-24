@@ -1,5 +1,6 @@
 import numpy as np
-
+from scipy import integrate
+from scipy.interpolate import CubicSpline
 
 def image_transform(sensor_reading, upscale_factor=48):
     """
@@ -25,3 +26,22 @@ def image_transform(sensor_reading, upscale_factor=48):
             transformed_image[i, j] = np.array([pixel, pixel, pixel])
 
     return transformed_image
+
+def numerical_position(times, acceleration_x, acceleration_y, acceleration_z):
+    accel_x_interp = CubicSpline(times, acceleration_x)
+    accel_y_interp = CubicSpline(times, acceleration_y)
+    accel_z_interp = CubicSpline(times, acceleration_z)
+
+    vel_x = np.array([integrate.quad(accel_x_interp, times[0], time)[0] for time in times])
+    vel_x_interp = CubicSpline(times, vel_x)
+    pos_x = np.array([integrate.quad(vel_x_interp, times[0], time)[0] for time in times])
+
+    vel_y = np.array([integrate.quad(accel_y_interp, times[0], time)[0] for time in times])
+    vel_y_interp = CubicSpline(times, vel_y)
+    pos_y = np.array([integrate.quad(vel_y_interp, times[0], time)[0] for time in times])
+
+    vel_z = np.array([integrate.quad(accel_z_interp, times[0], time)[0] for time in times])
+    vel_z_interp = CubicSpline(times, vel_z)
+    pos_z = np.array([integrate.quad(vel_z_interp, times[0], time)[0] for time in times])
+
+    return pos_x, pos_y, pos_z
