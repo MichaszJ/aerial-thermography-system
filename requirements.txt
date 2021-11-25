@@ -3,5 +3,5 @@ matplotlib
 plotly
 pandas
 numpy
-cv2
+opencv-python
 scipy
