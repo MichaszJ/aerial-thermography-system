@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import integrate
 from scipy.interpolate import CubicSpline
+import streamlit as st
 
 def image_transform(sensor_reading, upscale_factor=48):
     """
@@ -27,6 +28,7 @@ def image_transform(sensor_reading, upscale_factor=48):
 
     return transformed_image
 
+@st.cache
 def numerical_position(times, acceleration_x, acceleration_y, acceleration_z):
     accel_x_interp = CubicSpline(times, acceleration_x)
     accel_y_interp = CubicSpline(times, acceleration_y)
