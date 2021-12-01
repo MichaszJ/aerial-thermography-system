@@ -15,6 +15,11 @@ st.title('Aerial Thermography System - Analysis Software')
 st.sidebar.markdown('## Import Data File')
 data_file = st.sidebar.file_uploader('Data File (.csv)', type=['csv'])
 
+if st.sidebar.button('More Info'):
+    st.sidebar.write('Created by Michal Jagodzinski')
+    st.sidebar.write('along with David, Keyur, Malik, and Rushank')
+    st.sidebar.write('Part of our AER817 Systems Engineering Project')
+
 if data_file is not None:
     data_frame = pd.read_csv(data_file, header=None).rename(columns={0: 'Time', 1: 'Acceleration', 2: 'Image'})
 
@@ -50,7 +55,7 @@ if data_file is not None:
     img_prev = st.slider('Select Image', min_value=1, max_value=len(images), step=1)
 
     fig, ax = plt.subplots()
-    img = ax.imshow(images[img_prev-1])
+    img = ax.imshow(images[img_prev-1], cmap='plasma')
     ax.invert_yaxis()
     fig.colorbar(img, label='Temperature (°C)')
     st.pyplot(fig)
@@ -77,7 +82,7 @@ if data_file is not None:
 
         if status != 1:
             fig2, ax2 = plt.subplots()
-            ax2.imshow(stitched)
+            ax2.imshow(stitched, cmap='plasma')
 
             st.pyplot(fig2)
         else:
