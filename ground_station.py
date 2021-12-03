@@ -13,7 +13,7 @@ from scanning_utils import image_transform, numerical_position
 st.title('Aerial Thermography System - Analysis Software')
 
 st.sidebar.markdown('## Import Data File')
-data_file = st.sidebar.file_uploader('Data File (.csv)', type=['csv'])
+data_file = st.sidebar.file_uploader('Data File (.csv or CSV format)')
 
 if st.sidebar.button('More Info'):
     st.sidebar.write('Created by Michal Jagodzinski')
