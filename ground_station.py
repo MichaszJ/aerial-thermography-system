@@ -49,7 +49,8 @@ if data_file is not None:
 
     fig = go.Figure()
     fig.add_trace(go.Scatter3d(x=pos_x, y=pos_y, z=pos_z))
-    st.plotly_chart(fig)
+    fig.update_layout(template='plotly_white', height=600, width=800)
+    st.plotly_chart(fig, use_container_width=True, height=800, width=800)
 
     st.markdown('## Image Preview')
     img_prev = st.slider('Select Image', min_value=1, max_value=len(images), step=1)
@@ -57,6 +58,8 @@ if data_file is not None:
     fig, ax = plt.subplots()
     img = ax.imshow(images[img_prev-1], cmap='plasma')
     ax.invert_yaxis()
+    ax.axes.xaxis.set_visible(False)
+    ax.axes.yaxis.set_visible(False)
     fig.colorbar(img, label='Temperature (°C)')
     st.pyplot(fig)
 
@@ -65,24 +68,48 @@ if data_file is not None:
         up_factor = st.slider('Upscale Factor', min_value=1, max_value=100, step=1)
 
         st.markdown('Select image range to merge:')
-        first_image = st.number_input('First Image', min_value=1, max_value=len(images))
-        last_image = st.number_input('Last Image', value=len(images), min_value=1, max_value=len(images))
+        first_image = int(st.number_input('First Image', min_value=1, max_value=len(images)))
+        last_image = int(st.number_input('Last Image', value=len(images), min_value=1, max_value=len(images)))
 
     with right_col:
         run_stitch = st.checkbox('Merge images?')
+
+    fig_multi, (ax_l, ax_r) = plt.subplots(1, 2)
+    ax_l.imshow(images[first_image - 1], cmap='plasma')
+    ax_r.imshow(images[last_image - 1], cmap='plasma')
+
+    ax_l.set_title('First Image')
+    ax_r.set_title('Last Image')
+
+    ax_l.invert_yaxis()
+    ax_r.invert_yaxis()
+
+    ax_l.axes.xaxis.set_visible(False)
+    ax_l.axes.yaxis.set_visible(False)
+    ax_r.axes.xaxis.set_visible(False)
+    ax_r.axes.yaxis.set_visible(False)
+
+    st.pyplot(fig_multi)
     
     if run_stitch:
-        images_transform = [image_transform(image, upscale_factor=up_factor) for image in images]
-
+        images_transform = [image_transform(image, upscale_factor=up_factor) for image in images[first_image-1:last_image-1]]
         stitcher = cv2.Stitcher_create(mode=1)
-        status, stitched = stitcher.stitch(images_transform[first_image-1:last_image])
+        status, stitched = stitcher.stitch(images_transform)
         status_codes = ['OK', 'ERR_NEED_MORE_IMGS', 'ERR_HOMOGRAPHY_EST_FAIL', 'ERR_CAMERA_PARAMS_ADJUST_FAIL']
 
         st.write('Stitch Status Code: ', status)
 
         if status != 1:
+            st.write(stitched.shape)
+            stitched_transformed = stitched[:,:,0]
+
+
             fig2, ax2 = plt.subplots()
-            ax2.imshow(stitched, cmap='plasma')
+            ax2.axes.xaxis.set_visible(False)
+            ax2.axes.yaxis.set_visible(False)
+            ax2.invert_yaxis()
+            img2 = ax2.imshow(stitched_transformed, cmap='plasma')
+            fig2.colorbar(img2, label='Temperature (°C)')
 
             st.pyplot(fig2)
         else:
